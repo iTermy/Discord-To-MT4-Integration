@@ -1,21 +1,4 @@
 #property strict
-// ---------------------------------------------
-// ***** ONLY CHANGE THINGS INSIDE HERE ***** //
-
-string filename = "";
-// Copy path to "connections.txt" inside the "". Example: string filename = "C:\\MyUser\\My bot\\connection.txt";
-// IMPORTANT: When you copy and paste the path, only one \ will separate the folders.
-// make sure you change it to have two '\'s for the path, or else it won't work properly. See example.
-
-
-string lot_size_file = "";
-// Do the same as above, but for lot_size.txt
-
-
-// To disable auto-spread adjustment, follow instructions on lines 187-193 */
-
-
-// ---------------------------------------------
 
 #import "kernel32.dll"
     int CreateFileW(string lpFileName, uint dwDesiredAccess, uint dwShareMode, int lpSecurityAttributes, uint dwCreationDisposition, uint dwFlagsAndAttributes, int hTemplateFile);
@@ -34,6 +17,23 @@ string lot_size_file = "";
 #define OPEN_EXISTING 3
 #define INVALID_HANDLE_VALUE -1
 #define FILE_BEGIN 0
+
+// ---------------------------------------------
+// ***** ONLY CHANGE THINGS INSIDE HERE ***** //
+
+string filename = "";
+// Copy path to "connections.txt" inside the "". Example: string filename = "C:\\MyUser\\My bot\\connection.txt";
+// IMPORTANT: When you copy and paste the path, only one \ will separate the folders.
+// make sure you change it to have two '\'s for the path, or else it won't work properly. See example.
+
+
+string lot_size_file = "";
+// Do the same as above, but for lot_size.txt
+
+
+// To disable auto-spread adjustment, follow instructions on lines 197-203 */
+
+// ---------------------------------------------
 
 string lastContent = "";
 double lastLot = 0.01;
