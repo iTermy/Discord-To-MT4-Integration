@@ -1,11 +1,15 @@
 import re
+
+
 # This code is meant for Blaze Markets, so all the symbols correspond to Blaze Markets symbols
 # If you have a different broker, adjust the symbols_mapping an on line 28 to change it
+# parse_complex_string() cannot read symbols with numbers in it (e.g. us30). Instead, write dow or written symbol
 
 def parse_complex_string(input_string):
     # Define regex patterns
     price_pattern = r'(\d+\.?\d*)'
-    symbol_pattern = (r'\b(audusd|eurusd|gbpusd|usdcad|usdchf|usdjpy|audcad|audchf|audjpy|audnzd|cadchf|cadjpy|chfjpy|euraud|eurcad|eurchf|eurgbp|eurjpy|eurnzd|gbpaud|gbpcad|gbpchf|gbpjpy|gbpnzd|nzdcad|nzdchf|nzdjpy|nzdusd|gu|gold|oil|silver|nas|nasdaq|dxy|spx|dax|dow|bitcoin|btc)\b')
+    symbol_pattern = (
+        r'\b(audusd|eurusd|gbpusd|usdcad|usdchf|usdjpy|audcad|audchf|audjpy|audnzd|cadchf|cadjpy|chfjpy|euraud|eurcad|eurchf|eurgbp|eurjpy|eurnzd|gbpaud|gbpcad|gbpchf|gbpjpy|gbpnzd|nzdcad|nzdchf|nzdjpy|nzdusd|gu|gold|oil|silver|nas|nasdaq|dxy|spx|dax|dow|bitcoin|btc)\b')
     price_exempt_symbols = ['XAUUSD', 'WTI', 'XAGUSG', 'US100', 'USDIDX', 'US500', 'GER30', 'US30', 'BTCUSD']
     position_pattern = r'\b(short|long)\b'
 
@@ -53,7 +57,6 @@ def parse_complex_string(input_string):
         sl_float /= 100000
     sl = sl_float
 
-
     # Generate output
     output = []
     for price in processed_prices:
@@ -61,11 +64,11 @@ def parse_complex_string(input_string):
 
     return "\n".join(output)
 
-def replace_file_content(file_path, input_string):
+
+def replace_file_content(file_path, command, input_string):
     try:
-        # Open the file in write mode
         with open(file_path, 'w') as file:
-            # Write the input string to the file
+            file.write(command + '\n')
             file.write(input_string)
         print(f'Successfully replaced content in {file_path}')
     except Exception as e:
