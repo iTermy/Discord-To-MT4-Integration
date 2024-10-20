@@ -9,7 +9,7 @@ TOKEN = ''
 
 
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix='^^', intents=intents)
+bot = commands.Bot(command_prefix='^', intents=intents)
 bot.remove_command('help')
 
 async def main():
