@@ -423,66 +423,66 @@ void ProcessLimits(string content, double LotSize)
          totalPipStopLoss = MathRound(totalPipStopLoss * 100);
          Print("The total pip loss would be " + string(totalPipStopLoss) + " pips or " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
       
-         autoSizedLot = NormalizeDouble(((balance * ((double)risk / 100 )) / (totalPipStopLoss * (0.01 / (MarketInfo(symbol, MODE_ASK))))/100000) / (double)lineCount, 2);
+         autoSizedLot = NormalizeDouble(((balance * ((double)risk / 100 )) / (totalPipStopLoss * (0.01 / (MarketInfo(symbol, MODE_ASK))))/100000), 2);
          Print("Lots per limit is", autoSizedLot);
-         // ((Account size * (Risk % / 100 )) / (SL Pips * (0.01 / USDJPY price))/100000)  / # of limits
+         // ((Account size * (Risk % / 100 )) / (SL Pips * (0.01 / USDJPY price))/100000)
       }
       
       
       else if (symbol == "XAUUSD")
       {
          Print("In the case of stop loss, " + symbol + " will go $" + (string)NormalizeDouble(totalPipStopLoss, 2) + " against you and you will lose " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
-         autoSizedLot = NormalizeDouble(((balance * double(risk) / 100) / (totalPipStopLoss * 100) / (double)lineCount), 2);
-         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 100) / # of limits
+         autoSizedLot = NormalizeDouble(((balance * double(risk) / 100) / (totalPipStopLoss * 100)), 2);
+         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 100)
       }
       
       else if (symbol == "US100")
       {
          Print("In the case of stop loss, " + symbol + "will go $" + (string)NormalizeDouble(totalPipStopLoss, 2) + " against you and you will lose " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
-         autoSizedLot = NormalizeDouble(((balance * double(risk) / 100) / (totalPipStopLoss * 20) / (double)lineCount), 2);
-         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 20) / # of limits
+         autoSizedLot = NormalizeDouble(((balance * double(risk) / 100) / (totalPipStopLoss * 20)), 2);
+         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 20)
       }
       
       else if (symbol == "WTI")
       {
          Print("In the case of stop loss, " + symbol + "will go $" + (string)NormalizeDouble(totalPipStopLoss, 2) + " against you and you will lose " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
-         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 1000)) / (double)lineCount), 2);
-         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 1000) / # of limits
+         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 1000))), 2);
+         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 1000
       }
       
       else if (symbol == "US500")
       {
          Print("In the case of stop loss, " + symbol + "will go $" + (string)NormalizeDouble(totalPipStopLoss, 2) + " against you and you will lose " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
-         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 50)) / (double)lineCount), 2);
-         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 50) / # of limits
+         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 50))), 2);
+         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 50)
       }
       
       else if (symbol == "GER30")
       {
          Print("In the case of stop loss, " + symbol + "will go $" + (string)NormalizeDouble(totalPipStopLoss, 2) + " against you and you will lose " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
-         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 27)) / (double)lineCount), 2);
-         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 27) / # of limits
+         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 27))), 2);
+         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 27)
       }
       
       else if (symbol == "US30")
       {
          Print("In the case of stop loss, " + symbol + "will go $" + (string)NormalizeDouble(totalPipStopLoss, 2) + " against you and you will lose " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
-         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 5)) / (double)lineCount), 2);
-         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 5) / # of limits
+         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 5))), 2);
+         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 5)
       }
       
       else if (symbol == "XAGUSD")
       {
          Print("In the case of stop loss, " + symbol + "will go $" + (string)NormalizeDouble(totalPipStopLoss, 2) + " against you and you will lose " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
-         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 5000)) / (double)lineCount), 2);
-         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 5000) / # of limits
+         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 5000))), 2);
+         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 5000)
       }
       
       else if (symbol == "BTCUSD")
       {
          Print("In the case of stop loss, " + symbol + "will go $" + (string)NormalizeDouble(totalPipStopLoss, 2) + " against you and you will lose " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
-         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 1)) / (double)lineCount), 2);
-         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 1) / # of limits
+         autoSizedLot = NormalizeDouble((((balance * double(risk) / 100) / (totalPipStopLoss * 1))), 2);
+         // Lot Size = (Account size * (Risk / 100)) / (SL in dollars * 1)
       }
       
       // Regular forex pair lot calculation
@@ -490,8 +490,8 @@ void ProcessLimits(string content, double LotSize)
       {
          totalPipStopLoss = MathRound(totalPipStopLoss * 10000);
          Print("The total pip loss would be " + string(totalPipStopLoss) + " pips or " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
-         autoSizedLot = NormalizeDouble(((((balance * (double)risk / 100)/(totalPipStopLoss * 0.1))/100)) / (double)lineCount, 2);
-         // ((Account size x Risk /100)/(Avg Sl*0.1))/100 / # of limits
+         autoSizedLot = NormalizeDouble(((((balance * (double)risk / 100)/(totalPipStopLoss * 0.1))/100)), 2);
+         // ((Account size x Risk /100)/(Avg Sl*0.1))/100
       }
 
       for (int i = 0; i < lineCount; i++)
@@ -586,7 +586,7 @@ void PlaceLimitOrder(string symbol, int orderType, double price, double stopLoss
         Print("Error: Invalid order type for ", symbol);
         return;
     }
-    
+    Print(currLot);
     int ticket = OrderSend(symbol, orderType, currLot, adjustedPrice, 3, adjustedStopLoss, 0, "Discord order", 0, 0, clrNONE);
     
     if (ticket > 0)
