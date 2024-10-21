@@ -16,8 +16,10 @@ General commands:
 {self.bot.command_prefix}delete (paste order in '{self.bot.command_prefix}viewpendingorders' format)
 {self.bot.command_prefix}viewpendingorders - displays all active orders
 {self.bot.command_prefix}lotsize (number) - sets lot size (autolot must be off)
-{self.bot.command_prefix}prefix (prefix) - changes prefix
+{self.bot.command_prefix}saveandcloseallorders - saves all current limit orders to saved_orders.txt
+{self.bot.command_prefix}loadallsavedorders - loads back all orders from saved_orders.txt
 {self.bot.command_prefix}deleteall - deletes all pending orders
+{self.bot.command_prefix}prefix (prefix) - changes prefix
 
 Change default settings:
 {self.bot.command_prefix}setting autospread (on/off) - toggles Auto-calculate spread. Default: off
