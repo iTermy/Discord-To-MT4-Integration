@@ -560,7 +560,7 @@ void PlaceLimitOrder(string symbol, int orderType, double price, double stopLoss
       if (autospread == "on")
       {
         adjustedPrice = NormalizeDouble(price + spread * point, digits);
-        adjustedStopLoss = NormalizeDouble(stopLoss + spread * point, digits);
+        adjustedStopLoss = NormalizeDouble(stopLoss, digits);
       }
       else
       {
@@ -573,7 +573,7 @@ void PlaceLimitOrder(string symbol, int orderType, double price, double stopLoss
       if (autospread == "on")
       {
         adjustedPrice = NormalizeDouble(price - spread * point, digits);
-        adjustedStopLoss = NormalizeDouble(stopLoss - spread * point, digits);
+        adjustedStopLoss = NormalizeDouble(stopLoss, digits);
       }
       else
       {

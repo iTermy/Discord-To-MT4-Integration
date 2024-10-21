@@ -1,6 +1,8 @@
 from discord.ext import commands
 from helper_functions import parse_complex_string, replace_file_content
 import re
+import asyncio
+from collections import defaultdict
 
 
 MT4_connection_file = 'connection.txt'
@@ -163,21 +165,39 @@ class trading_cog(commands.Cog):
         try:
             # Read the contents of saved_orders.txt
             with open('saved_orders.txt', 'r') as file:
-                saved_orders = file.read().strip()
+                saved_orders = file.read().strip().split('\n')
 
-            # Prepare the content for connection.txt
-            connection_content = "addLimits\n" + saved_orders
+            # Group orders by stop loss
+            orders_by_stop_loss = defaultdict(list)
+            for order in saved_orders:
+                parts = order.split()
+                if len(parts) >= 4:
+                    stop_loss = parts[3]
+                    orders_by_stop_loss[stop_loss].append(order)
 
-            # Write the content to connection.txt
-            with open('connection.txt', 'w') as file:
-                file.write(connection_content)
+            # Process each group of orders
+            for stop_loss, orders in orders_by_stop_loss.items():
+                # Prepare the content for connection.txt
+                connection_content = "addLimits\n" + "\n".join(orders)
+
+                # Write the content to connection.txt
+                with open('connection.txt', 'w') as file:
+                    file.write(connection_content)
+
+                await ctx.send(f"Orders with stop loss {stop_loss} loaded into 'connection.txt'.")
+
+                # Wait for connection.txt to be empty
+                while True:
+                    await asyncio.sleep(1)  # Wait for 1 second
+                    with open('connection.txt', 'r') as file:
+                        if not file.read().strip():
+                            break
 
             # Clear the contents of saved_orders.txt
             with open('saved_orders.txt', 'w') as file:
                 file.write('')
 
-            await ctx.send(
-                "Saved orders loaded into 'connection.txt' successfully. 'saved_orders.txt' has been cleared.")
+            await ctx.send("All saved orders have been processed and 'saved_orders.txt' has been cleared.")
         except FileNotFoundError:
             await ctx.send("Error: 'saved_orders.txt' not found.")
         except Exception as e:
