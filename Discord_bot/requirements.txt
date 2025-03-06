@@ -1,0 +1,3 @@
+audioop-lts
+discord.py
+asyncio
