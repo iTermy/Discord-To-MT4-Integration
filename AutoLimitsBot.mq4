@@ -1,3 +1,9 @@
+//+------------------------------------------------------------------+
+//| AutoLimitsBot.mq4                            Made by: RipFishh   |
+//|                                                                  |
+//| Expert Advisor that handles a wide array of discord commands     |
+//| Last updated: 3/6/2025                                           |
+//+------------------------------------------------------------------+
 #property strict
 
 #import "kernel32.dll"
@@ -19,23 +25,23 @@
 #define FILE_BEGIN 0
 
 //-------------------------------------------+
-// ONLY CHANGE THINGS INSIDE HERE
+// ONLY CHANGE THINGS INSIDE HERE            |
 //-------------------------------------------+
 
-string filename = "";
-// Copy path to "connection.txt" inside the "". Example: string filename = "C:\\MyUser\\My bot\\connection.txt";
-// IMPORTANT: When you copy and paste the path, only one \ will separate the folders.
-// make sure you change it to have two '\'s for the path, or else it won't work properly. See example.
-
-string defaultSettingsPath = "";
-// Do the same as above, but for default_settings.txt
-
-string pendingOrdersPath = "";
-// Do the same as above, but for active_orders.txt
+string connectionFilesPath = "";
+// Copy path to "connection_files" folder inside the ""
+// IMPORTANT: When you copy and paste the path, change it to have two '\'s instead of one. See example.
+// EXAMPLE: string connectionFilesPath = "C:\\MyUser\\My bot\\connection_files";
 
 //-------------------------------------------+
-// ONLY CHANGE THINGS INSIDE HERE
+// ONLY CHANGE THINGS INSIDE HERE            |
 //-------------------------------------------+
+
+// Paths
+string defaultSettingsPath = connectionFilesPath + "\\default_settings.txt";
+string pendingOrdersPath = connectionFilesPath + "\\active_orders.txt";
+string filename = connectionFilesPath + "\\connection.txt";
+string messagePath = connectionFilesPath + "\\message.txt";
 
 // Global variables
 string lastContent = "";
@@ -49,6 +55,10 @@ string autospread;
 string autolot;
 double defaultlotsize;
 string risk;
+
+//-------------------------------------------+
+// MAIN FUNCTIONS     `                      |
+//-------------------------------------------+
 
 int OnInit()
 {
@@ -64,6 +74,7 @@ void OnDeinit(const int reason)
 }
 void OnTimer()
 {
+     // Logic to run every 10 seconds
      countSecs++;
      if (countSecs >= interval)
      {
@@ -73,9 +84,10 @@ void OnTimer()
       countSecs = 0;
      }
      
+     // Reads file outside MT4
      string fileContent = ReadFileOutsideSandbox(filename);
 
-      // COMMANDS: All processed from connection.txt
+     // COMMANDS: All processed from connection.txt
      if ((StringLen(fileContent) > 0) && (fileContent != lastContent))
      {
       string command = ProcessCommand(fileContent);
@@ -87,6 +99,7 @@ void OnTimer()
       
       else if (command == "addLimits" && !tradeinProgress)
       {
+         Print("Processing and adding limits...");
          tradeinProgress = true;
          ProcessLimits(fileContent, lotsize);
          tradeinProgress = false;
@@ -102,13 +115,15 @@ void OnTimer()
       }
       else
       {
-         Print("Invalid command used!");
+         Print("Invalid command used.");
       }
      }
 }
-// -------------------------------
-// HELPER FUNCTIONS
-// -------------------------------
+//--------------------------------+
+// HELPER FUNCTIONS               |
+//--------------------------------+
+
+// Reads file and returns content as a string. Use for files outside of MT4 sandbox
 string ReadFileOutsideSandbox(string file_path)
 {
     int fileHandle = CreateFileW(file_path, GENERIC_READ| GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
@@ -141,6 +156,7 @@ string ReadFileOutsideSandbox(string file_path)
     }
 }
 
+// Writes to Files outside sandbox. Replacing already existing content in path
 void WriteFileOutsideSandbox(string filepath, string content)
 {
     int fileHandle = CreateFileW(filepath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
@@ -164,6 +180,7 @@ void WriteFileOutsideSandbox(string filepath, string content)
     CloseHandle(fileHandle);
 }
 
+// Given content from connection.txt, returns first line as command ediits filecontent to exclude first line.
 string ProcessCommand(string &fileContent)
 {
    string lines[];
@@ -186,6 +203,7 @@ string ProcessCommand(string &fileContent)
    return command;
 }
 
+// Reads the default_settings.txt file without clearing it. Returns its contents.
 string ReadDefaultSettingsFile(string file_path)
 {
     int fileHandle = CreateFileW(file_path, GENERIC_READ| GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
@@ -213,6 +231,7 @@ string ReadDefaultSettingsFile(string file_path)
     }
 }
 
+// Changes default setting global variables
 void ProcessDefaultSettings(string settingsPath)
 {
    string defaultContent = ReadDefaultSettingsFile(settingsPath);
@@ -228,6 +247,7 @@ void ProcessDefaultSettings(string settingsPath)
    }
 }
 
+// Helper function for above
 void ProcessSettingLine(string line)
 {
     string parts[];
@@ -317,7 +337,9 @@ void WritePendingLimitsToFile()
                 double stopLoss = NormalizeDouble(OrderStopLoss(), priceDecimals);
                 double currentPrice = MarketInfo(symbol, MODE_BID);
                 double distance = CalculateDistance(symbol, currentPrice, limitPrice);
-                
+                double num_lots = OrderLots();
+                datetime order_expiry = OrderExpiration();
+
                 string distanceUnit = (symbol == "XAUUSD" || symbol == "XAGUSD" || 
                                        symbol == "US100" || symbol == "US500" || 
                                        symbol == "GER30" || symbol == "US30" || 
@@ -325,11 +347,23 @@ void WritePendingLimitsToFile()
                 
                 string limitPriceStr = DoubleToString(limitPrice, priceDecimals);
                 string stopLossStr = DoubleToString(stopLoss, priceDecimals);
-                string distanceStr = DoubleToString(distance, 2);
+                string distanceStr;
                 
-                content += StringFormat("%s %s %s %s %s%s\n", 
+                if (symbol == "XAUUSD" || symbol == "XAGUSD" || 
+                                       symbol == "US100" || symbol == "US500" || 
+                                       symbol == "GER30" || symbol == "US30" || 
+                                       symbol == "BTCUSD" || symbol == "WTI")
+                {
+                  distanceStr = DoubleToString(distance, 2);
+                }
+                
+                else
+                {
+                  distanceStr = DoubleToString(distance / 10, 2);
+                }
+                content += StringFormat("%s %s %s %s %s%s %s\n", 
                                         symbol, direction, limitPriceStr, 
-                                        stopLossStr, distanceStr, distanceUnit);
+                                        stopLossStr, distanceStr, distanceUnit, DetermineExpiryType(order_expiry));
             }
         }
     }
@@ -340,6 +374,7 @@ void WritePendingLimitsToFile()
     }
 }
 
+// Clears entire file
 bool ClearFile(string file_path)
 {
     int fileHandle = CreateFileW(file_path, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
@@ -364,6 +399,93 @@ bool ClearFile(string file_path)
     CloseHandle(fileHandle);
     // Print("File cleared successfully");
     return true;
+}
+
+// Calculate expiry
+datetime CalculateExpiration(string expiry) {
+    // Time offset for EST from UTC
+    int estOffset = -5 * 3600; // EST is UTC-5
+    if (TimeDaylightSavings()) {
+        estOffset += 3600; // Adjust for daylight saving time
+    }
+
+    // Get the current server time (UTC)
+    datetime now = TimeCurrent();
+
+    // Convert server time to EST
+    datetime nowEST = now + estOffset;
+
+    // Create a structure to hold the time details
+    MqlDateTime timeStruct;
+    TimeToStruct(nowEST, timeStruct);
+
+    if (expiry == "DAY") {
+        // Set time to 4:45 PM EST
+        if (timeStruct.hour > 16 || (timeStruct.hour == 16 && timeStruct.min >= 45)) {
+            // If the current time is past 4:45 PM, move to the next day
+            timeStruct.day += 1;
+        }
+        timeStruct.hour = 16;
+        timeStruct.min = 45;
+        timeStruct.sec = 0;
+
+        datetime endOfDayEST = StructToTime(timeStruct);
+        return endOfDayEST - estOffset; // Convert back to UTC
+    } 
+    else if (expiry == "WEEK") {
+        // Calculate Friday of the same week
+        int currentDayOfWeek = TimeDayOfWeek(nowEST); // 0=Sunday, ..., 6=Saturday
+        int daysUntilFriday = (5 - currentDayOfWeek + 7) % 7; // Days until Friday
+        timeStruct.day += daysUntilFriday; // Move to Friday
+        timeStruct.hour = 16;
+        timeStruct.min = 45;
+        timeStruct.sec = 0;
+
+        datetime fridayEST = StructToTime(timeStruct);
+        return fridayEST - estOffset; // Convert back to UTC
+    }
+
+    // Default return value for invalid input
+    return 0;
+}
+
+// Opposite of above function, returns "DAY" or "WEEK" based on datetime
+string DetermineExpiryType(datetime expiry) {
+    // Time offset for EST from UTC
+    int estOffset = -5 * 3600; // EST is UTC-5
+    if (TimeDaylightSavings()) {
+        estOffset += 3600; // Adjust for daylight saving time
+    }
+
+    // Convert expiry to EST
+    datetime expiryEST = expiry + estOffset;
+
+    // Create a structure to hold the time details
+    MqlDateTime timeStruct;
+    TimeToStruct(expiryEST, timeStruct);
+
+    // Check if the expiry matches 4:45 PM EST today
+    datetime now = TimeCurrent();
+    datetime nowEST = now + estOffset;
+    MqlDateTime nowStruct;
+    TimeToStruct(nowEST, nowStruct);
+
+    if (timeStruct.hour == 16 && timeStruct.min == 45 && timeStruct.sec == 0) {
+        if (timeStruct.year == nowStruct.year && 
+            timeStruct.mon == nowStruct.mon && 
+            timeStruct.day == nowStruct.day) {
+            return "DAY";
+        }
+
+        // Check if the expiry matches Friday of the same week
+        int dayOfWeek = TimeDayOfWeek(expiryEST); // 0=Sunday, ..., 6=Saturday
+        if (dayOfWeek == 5) { // Friday
+            return "WEEK";
+        }
+    }
+
+    // Default return if neither condition matches
+    return "WEEK";
 }
 
 //----------------------------------------------
@@ -402,7 +524,7 @@ void ProcessLimits(string content, double LotSize)
           {
             string parts[];
             int partCount = StringSplit(line, ' ', parts);
-            if (partCount != 4)
+            if (partCount != 5)
             {
                Print("Invalid order line format: ", line);
                return;
@@ -418,7 +540,9 @@ void ProcessLimits(string content, double LotSize)
     if (autolot == "on")
     {
       // USDJPY Lot calculation
-      if (symbol == "USDJPY")
+      if (symbol == "USDJPY" || symbol == "EURJPY" || symbol == "GBPJPY" ||
+          symbol == "AUDJPY" || symbol == "CHFJPY" || symbol == "NZDJPY" ||
+          symbol == "CADJPY")
       {
          totalPipStopLoss = MathRound(totalPipStopLoss * 100);
          Print("The total pip loss would be " + string(totalPipStopLoss) + " pips or " + (string)MathRound((balance * (double(risk)))/100) + " dollars.");
@@ -499,33 +623,38 @@ void ProcessLimits(string content, double LotSize)
          string line = StringTrimRight(StringTrimLeft(lines[i]));
          if (StringLen(line) > 0)
          {
-            ProcessOrderLine(line, autoSizedLot);
+            if (ProcessOrderLine(line, autoSizedLot) == false) {
+               WriteFileOutsideSandbox(messagePath, "Error\nAn error occurred while placing limits in MetaTrader4. Please check the logs.");
+               return;
+            }
          }
       }
     }
+    WriteFileOutsideSandbox(messagePath, "addLimits\n" + content);
 }
 
-void ProcessOrderLine(string line, double LotSize)
+bool ProcessOrderLine(string line, double LotSize)
 {
     double currLot = LotSize;
     string parts[];
     int partCount = StringSplit(line, ' ', parts);
     
-    if (partCount != 4)
+    if (partCount != 5)
     {
         Print("Invalid order line format: ", line);
-        return;
+        return false;
     }
     
     double price = StringToDouble(parts[0]);
     string symbol = parts[1];
     string direction = parts[2];
     double stopLoss = StringToDouble(parts[3]);
+    string expiry  = parts[4];
     
     if (price <= 0 || stopLoss <= 0)
     {
         Print("Invalid price or stop loss in line: ", line);
-        return;
+        return false;
     }
     
     int orderType;
@@ -536,13 +665,18 @@ void ProcessOrderLine(string line, double LotSize)
     else
     {
         Print("Invalid direction in line: ", line);
-        return;
+        return false;
     }
     
-    PlaceLimitOrder(symbol, orderType, price, stopLoss, LotSize);
+    if (PlaceLimitOrder(symbol, orderType, price, stopLoss, LotSize, expiry)) {
+      return true;
+    }
+    else {
+      return false;
+    }
 }
 
-void PlaceLimitOrder(string symbol, int orderType, double price, double stopLoss, double LotSize)
+bool PlaceLimitOrder(string symbol, int orderType, double price, double stopLoss, double LotSize, string expiry)
 {
     // Calculates stop loss
     double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
@@ -554,6 +688,7 @@ void PlaceLimitOrder(string symbol, int orderType, double price, double stopLoss
     double adjustedPrice = price;
     double adjustedStopLoss = stopLoss;
     double currLot = LotSize;
+    datetime expiry_formatted = CalculateExpiration(expiry);
     
     if (orderType == OP_BUYLIMIT)
     {
@@ -584,15 +719,21 @@ void PlaceLimitOrder(string symbol, int orderType, double price, double stopLoss
     else
     {
         Print("Error: Invalid order type for ", symbol);
-        return;
+        return false;
     }
-    Print(currLot);
-    int ticket = OrderSend(symbol, orderType, currLot, adjustedPrice, 3, adjustedStopLoss, 0, "Discord order", 0, 0, clrNONE);
     
-    if (ticket > 0)
-        Print("Order placed successfully: ", symbol, " ", EnumToString((ENUM_ORDER_TYPE)orderType), " at ", adjustedPrice, " with SL ", adjustedStopLoss);
-    else
+    Print("Attempting to place order...", symbol, " ", EnumToString((ENUM_ORDER_TYPE)orderType), " at ", adjustedPrice, " with SL ", adjustedStopLoss, " expiring ", TimeToString(CalculateExpiration(expiry), TIME_DATE | TIME_MINUTES));
+    int ticket = OrderSend(symbol, orderType, currLot, adjustedPrice, 3, adjustedStopLoss, 0, "Discord order", 0, expiry_formatted, clrNONE);
+    
+    if (ticket > 0){
+        Print("Order placed successfully: ", symbol, " ", EnumToString((ENUM_ORDER_TYPE)orderType), " at ", adjustedPrice, " with SL ", adjustedStopLoss, " expiring ", TimeToString(CalculateExpiration(expiry), TIME_DATE | TIME_MINUTES));
+        return true;
+        }
+    else {
         Print("Error placing order: ", GetLastError());
+        return false;
+        }
+        
 }
 
 // ---------------------------
@@ -612,6 +753,7 @@ void DeletePendingLimits(string message)
     if (ArraySize(parts) < 5)
     {
         Print("Invalid input format");
+        WriteFileOutsideSandbox(messagePath, "Error\nInvalid input format.");
         return;
     }
     
@@ -651,15 +793,21 @@ void DeletePendingLimits(string message)
                     {
                         bool result = OrderDelete(OrderTicket());
                         if (result)
+                            {
                             Print("Order deleted: Ticket ", OrderTicket());
-                        else
+                            } 
+                        else {
                             Print("Failed to delete order: Ticket ", OrderTicket(), ", Error ", GetLastError());
+                            WriteFileOutsideSandbox(messagePath, "Error\nUnable to delete order. Please check MetaTrader 4 logs for more info.");
+                            return;
+                            }
                         break;
                     }
                 }
             }
         }
     }
+    WriteFileOutsideSandbox(messagePath, "delOrder\n" + message);
 }
 
 //+------------------------------------------------------------------+
@@ -668,7 +816,6 @@ void DeletePendingLimits(string message)
 void DeleteAllPendingOrders()
 {
    int total = OrdersTotal();
-   
    for (int i = total - 1; i >= 0; i--)
    {
       if (OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
@@ -680,6 +827,8 @@ void DeleteAllPendingOrders()
             if (!result)
             {
                Print("Error deleting order ", OrderTicket(), " for ", OrderSymbol(), ": ", GetLastError());
+               WriteFileOutsideSandbox(messagePath, "Error\nSomething went wrong with deleting all orders. Please delete all manually and check logs for details.");
+               return;
             }
             else
             {
@@ -688,4 +837,5 @@ void DeleteAllPendingOrders()
          }
       }
    }
+   WriteFileOutsideSandbox(messagePath, "delAllOrders\nSuccess");
 }
