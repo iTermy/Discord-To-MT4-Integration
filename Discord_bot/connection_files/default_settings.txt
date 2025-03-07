@@ -1,4 +1,4 @@
 autospread off
-autolot on
+autolot off
 defaultlotsize 0.05
 risk 10
