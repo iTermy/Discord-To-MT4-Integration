@@ -117,7 +117,7 @@ def replace_file_content(file_path, command, input_string):
 
 class MQL4Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix='^^', intents=discord.Intents.all())
+        super().__init__(command_prefix='.', intents=discord.Intents.all())
         self.remove_command('help')
         self.channel_id = CHANNEL_ID
         self.channel = None
